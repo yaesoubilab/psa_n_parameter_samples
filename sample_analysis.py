@@ -17,11 +17,12 @@ def run_cea(n_param_samples):
 
     # generate random samples for the cost and effect of each strategy and put them
     # in a dictionary of costs and a dictionary of effects
-    rng = RandomState(0)
+    rng = RandomState(0)  # random number generator
     dict_cost_samples = {}  # dictionary of cost samples with strategy name as key
     dict_effect_samples = {}  # dictionary of effect samples with strategy name as key
+
+    # samples from normal distributions of cost and effect
     for s in dict_strategies:
-        # samples from normal distributions of cost and effect
         dict_cost_samples[s] = rng.normal(dict_strategies[s][0], dict_strategies[s][1], n_param_samples)
         dict_effect_samples[s] = rng.normal(dict_strategies[s][2], dict_strategies[s][3], n_param_samples)
 
@@ -43,30 +44,33 @@ def run_cea(n_param_samples):
         wtp_range=[0, 100000],  # range of willingness-to-pay values to use in the analysis
     )
 
-    # create the plot of CE plane and net monetary benefit (NMB) lines
+    # plot the CE plane and net monetary benefit (NMB) lines
     cea.plot_cep_nmb(
         fig_size=(8, 4),
         file_name='figs/cep nmb N={}.png'.format(n_param_samples),
-        cost_multiplier=0.001,
-        nmb_multiplier=0.001,
+        cost_multiplier=0.001,  # to show cost in thousands
+        nmb_multiplier=0.001,   # to show NMB in thousands
         cep_y_label='Additional Cost (Thousand)',
         nmb_y_label='Incremental NMB (Thousand)',
         show_strategy_label_on_nmb_frontier=True,
     )
 
+    # export the CE table
     cea.export_ce_table(
         file_name='tables/ce table N={}.csv'.format(n_param_samples),
-        cost_multiplier=0.001,
+        cost_multiplier=0.001,  # to show cost in thousands
     )
 
-    # calculate minimum required number of parameter samples
+    # plot the minimum required number of parameter samples for varying values of epsilon and alpha
     cea.plot_min_monte_carlo_parameter_samples(
         max_wtp=200000,
         epsilons=[1000, 2000, 5000],
         alphas=[0.05],
-        num_bootstrap_samples=1000,
+        num_bootstrap_samples=1000,  # to characterize the uncertainty intervals for the estimated minimum N
         file_name='figs/min n N={}.png'.format(n_param_samples)
     )
+
+    # export the minimum required number of parameter samples for varying values of epsilon and alpha
     cea.export_minimum_monte_carlo_samples(
         max_wtp=200000,
         epsilons=[1000, 2000, 5000],
@@ -75,6 +79,9 @@ def run_cea(n_param_samples):
     )
 
 
+# run the analysis first with N = 200
 run_cea(n_param_samples=200)
+
+# run the analysis again with N = 2000
 run_cea(n_param_samples=2000)
 
